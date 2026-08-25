@@ -1,0 +1,27 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final routerProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Text('CreatorsGrow Splash Foundation'),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Text('CreatorsGrow Dashboard Foundation'),
+          ),
+        ),
+      ),
+    ],
+  );
+});
