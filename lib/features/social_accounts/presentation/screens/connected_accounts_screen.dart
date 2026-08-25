@@ -104,6 +104,7 @@ class _ConnectedAccountsScreenState extends ConsumerState<ConnectedAccountsScree
                           platform: platform,
                           isConnected: isConnected,
                           accountName: connectedAcc.accountName,
+                          status: connectedAcc.status,
                           onConnect: () => _handleConnect(platform),
                           onDisconnect: () => _handleDisconnect(connectedAcc),
                         );
@@ -168,6 +169,7 @@ class _PlatformConnectionCard extends StatelessWidget {
   final SocialPlatform platform;
   final bool isConnected;
   final String accountName;
+  final String status;
   final VoidCallback onConnect;
   final VoidCallback onDisconnect;
 
@@ -175,6 +177,7 @@ class _PlatformConnectionCard extends StatelessWidget {
     required this.platform,
     required this.isConnected,
     required this.accountName,
+    required this.status,
     required this.onConnect,
     required this.onDisconnect,
   });
@@ -182,6 +185,7 @@ class _PlatformConnectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isComingSoon = !platform.isSupported;
+    final bool isReconnectRequired = status == 'reconnect_required';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -190,7 +194,9 @@ class _PlatformConnectionCard extends StatelessWidget {
         color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isConnected ? const Color(0xFF10B981) : Colors.transparent,
+          color: isConnected 
+              ? (isReconnectRequired ? Colors.orangeAccent : const Color(0xFF10B981))
+              : Colors.transparent,
           width: 1,
         ),
       ),
@@ -219,9 +225,21 @@ class _PlatformConnectionCard extends StatelessWidget {
                     style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
                   )
                 else if (isConnected)
-                  Text(
-                    '@$accountName',
-                    style: const TextStyle(color: Color(0xFF10B981), fontSize: 13, fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Text(
+                        '@$accountName',
+                        style: TextStyle(
+                          color: isReconnectRequired ? Colors.orangeAccent : const Color(0xFF10B981),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (isReconnectRequired) ...[
+                        const SizedBox(width: 4),
+                        const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 14),
+                      ]
+                    ],
                   )
                 else
                   const Text(
@@ -233,14 +251,23 @@ class _PlatformConnectionCard extends StatelessWidget {
           ),
           if (!isComingSoon)
             isConnected
-                ? OutlinedButton(
-                    onPressed: onDisconnect,
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.redAccent),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Text('Disconnect', style: TextStyle(color: Colors.redAccent)),
-                  )
+                ? (isReconnectRequired
+                    ? FilledButton(
+                        onPressed: onConnect,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.orangeAccent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Reconnect', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                      )
+                    : OutlinedButton(
+                        onPressed: onDisconnect,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.redAccent),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Disconnect', style: TextStyle(color: Colors.redAccent)),
+                      ))
                 : FilledButton(
                     onPressed: onConnect,
                     style: FilledButton.styleFrom(
