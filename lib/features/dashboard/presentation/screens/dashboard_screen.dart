@@ -8,6 +8,7 @@ import '../../../../features/onboarding/domain/notifiers/onboarding_notifier.dar
 import '../../../../features/social_accounts/presentation/notifiers/social_accounts_notifier.dart';
 import '../../../../features/social_accounts/domain/models/social_platform.dart';
 import '../../../../features/social_accounts/domain/models/social_account.dart';
+import '../../../../features/content/presentation/screens/content_list_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -23,7 +24,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     final List<Widget> tabs = [
       const _HomeTab(),
-      const _PlaceholderTab(title: 'Content Pipeline', icon: Icons.video_library_outlined),
+      const ContentListScreen(),
       const _PlaceholderTab(title: 'Advanced Analytics', icon: Icons.analytics_outlined),
       const _PlaceholderTab(title: 'Creator Insights', icon: Icons.insights_outlined),
       const _ProfileTab(),

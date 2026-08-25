@@ -14,6 +14,7 @@ import '../../features/onboarding/presentation/screens/platform_selection_screen
 import '../../features/onboarding/presentation/screens/onboarding_complete_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/social_accounts/presentation/screens/connected_accounts_screen.dart';
+import '../../features/content/presentation/screens/content_composer_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -93,6 +94,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/social-accounts',
         builder: (context, state) => const ConnectedAccountsScreen(),
+      ),
+      GoRoute(
+        path: '/composer',
+        builder: (context, state) => const ContentComposerScreen(),
       ),
     ],
   );
