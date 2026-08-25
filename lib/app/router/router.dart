@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/domain/models/auth_state.dart';
@@ -13,6 +13,7 @@ import '../../features/onboarding/presentation/screens/creator_goal_screen.dart'
 import '../../features/onboarding/presentation/screens/platform_selection_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_complete_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../../features/social_accounts/presentation/screens/connected_accounts_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -88,6 +89,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/home',
         builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: '/social-accounts',
+        builder: (context, state) => const ConnectedAccountsScreen(),
       ),
     ],
   );

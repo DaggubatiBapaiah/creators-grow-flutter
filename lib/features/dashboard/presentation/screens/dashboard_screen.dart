@@ -1,9 +1,13 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../features/auth/domain/models/auth_state.dart';
 import '../../../../features/auth/domain/notifiers/auth_notifier.dart';
 import '../../../../features/onboarding/domain/notifiers/onboarding_notifier.dart';
+import '../../../../features/social_accounts/presentation/notifiers/social_accounts_notifier.dart';
+import '../../../../features/social_accounts/domain/models/social_platform.dart';
+import '../../../../features/social_accounts/domain/models/social_account.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -87,6 +91,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final onboardingState = ref.watch(onboardingNotifierProvider);
+    final socialAccountsState = ref.watch(socialAccountsNotifierProvider);
 
     final displayName = authState is Authenticated
         ? authState.user.displayName
@@ -172,7 +177,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
                             flex: 2,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: _buildSideDashboardList(),
+                              children: _buildSideDashboardList(socialAccountsState),
                             ),
                           ),
                         ],
@@ -183,7 +188,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
                         children: [
                           ..._buildMainDashboardList(),
                           const SizedBox(height: 24),
-                          ..._buildSideDashboardList(),
+                          ..._buildSideDashboardList(socialAccountsState),
                         ],
                       ),
                   ],
@@ -332,7 +337,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
     ];
   }
 
-  List<Widget> _buildSideDashboardList() {
+  List<Widget> _buildSideDashboardList(AsyncValue<List<SocialAccount>> socialAccountsState) {
     return [
       // SECTION 2 - QUICK ACTIONS
       const Text(
@@ -359,7 +364,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
           _QuickActionTile(
             title: 'Connect Account',
             icon: Icons.add_link_rounded,
-            onTap: () => _navigateToPlaceholder(context, 'Connect Social Accounts'),
+            onTap: () => context.push('/social-accounts'),
           ),
           const SizedBox(height: 8),
           _QuickActionTile(
@@ -368,6 +373,56 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
             onTap: () => _navigateToPlaceholder(context, 'View Analytics'),
           ),
         ],
+      ),
+      const SizedBox(height: 32),
+
+      // NEW SECTION - SOCIAL ACCOUNTS STATUS
+      const Text(
+        'Social Accounts',
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+      ),
+      const SizedBox(height: 12),
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF334155), width: 0.5),
+        ),
+        child: Column(
+          children: socialAccountsState.when(
+            loading: () => [
+              const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
+            ],
+            error: (err, _) => [
+              const Text('Failed to load accounts.', style: TextStyle(color: Colors.redAccent))
+            ],
+            data: (accounts) {
+              return SocialPlatform.values.map((platform) {
+                final match = accounts.firstWhere(
+                  (acc) => acc.platform == platform,
+                  orElse: () => const SocialAccount(
+                    id: '',
+                    platform: SocialPlatform.instagram,
+                    accountName: '',
+                    platformAccountId: '',
+                    status: 'disconnected',
+                  ),
+                );
+
+                final String status = platform.isSupported
+                    ? (match.id.isNotEmpty ? 'connected' : 'disconnected')
+                    : 'coming_soon';
+
+                return _SocialAccountStatusRow(
+                  platform: platform.displayName,
+                  status: status,
+                  accountName: match.id.isNotEmpty ? match.accountName : null,
+                );
+              }).toList();
+            },
+          ),
+        ),
       ),
       const SizedBox(height: 32),
 
@@ -553,6 +608,49 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SocialAccountStatusRow extends StatelessWidget {
+  final String platform;
+  final String status;
+  final String? accountName;
+
+  const _SocialAccountStatusRow({
+    required this.platform,
+    required this.status,
+    this.accountName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isConnected = status == 'connected';
+    final isComingSoon = status == 'coming_soon';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            platform,
+            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
+          ),
+          Text(
+            isComingSoon
+                ? 'Coming soon'
+                : (isConnected ? 'Connected (@$accountName)' : 'Not connected'),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isComingSoon
+                  ? const Color(0xFF64748B)
+                  : (isConnected ? const Color(0xFF10B981) : Colors.redAccent),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
