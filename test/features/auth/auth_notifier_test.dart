@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:creators_grow/core/storage/secure_storage.dart';
 import 'package:creators_grow/core/errors/app_error.dart';
 import 'package:creators_grow/features/auth/data/repositories/auth_repository.dart';
@@ -21,6 +21,31 @@ class FakeSecureStorage implements SecureStorage {
   @override
   Future<void> deleteAuthToken() async {
     token = null;
+  }
+
+  @override
+  Future<void> saveOnboardingCompleted(bool completed) async {}
+
+  @override
+  Future<bool> isOnboardingCompleted() async => false;
+
+  @override
+  Future<void> saveProfileData({
+    required String displayName,
+    required String creatorCategory,
+    required List<String> goals,
+    required List<String> platforms,
+  }) async {}
+
+  @override
+  Future<Map<String, dynamic>> getOnboardingData() async {
+    return {
+      'completed': false,
+      'displayName': '',
+      'creatorCategory': '',
+      'goals': <String>[],
+      'platforms': <String>[],
+    };
   }
 
   @override
