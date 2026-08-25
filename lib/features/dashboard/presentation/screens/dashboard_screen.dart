@@ -359,7 +359,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
           _QuickActionTile(
             title: 'Schedule Content',
             icon: Icons.schedule_rounded,
-            onTap: () => _navigateToPlaceholder(context, 'Schedule Content'),
+            onTap: () => context.push('/calendar'),
           ),
           const SizedBox(height: 8),
           _QuickActionTile(
