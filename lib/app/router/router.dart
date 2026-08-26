@@ -16,6 +16,8 @@ import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/social_accounts/presentation/screens/connected_accounts_screen.dart';
 import '../../features/content/presentation/screens/content_composer_screen.dart';
 import '../../features/content/presentation/screens/calendar_screen.dart';
+import '../../features/monetization/presentation/screens/crm_pipeline_screen.dart';
+import '../../features/monetization/presentation/screens/mediakit_settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -103,6 +105,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/calendar',
         builder: (context, state) => const CalendarScreen(),
+      ),
+      GoRoute(
+        path: '/crm',
+        builder: (context, state) => const CrmPipelineScreen(),
+      ),
+      GoRoute(
+        path: '/mediakit-settings',
+        builder: (context, state) => const MediaKitSettingsScreen(),
       ),
     ],
   );

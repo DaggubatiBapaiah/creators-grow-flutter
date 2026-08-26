@@ -400,6 +400,20 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
             icon: Icons.bar_chart_rounded,
             onTap: () => _navigateToPlaceholder(context, 'View Analytics'),
           ),
+          const SizedBox(height: 8),
+          _QuickActionTile(
+            key: const Key('brandCrmQuickAction'),
+            title: 'Brand Deal CRM',
+            icon: Icons.monetization_on_outlined,
+            onTap: () => context.push('/crm'),
+          ),
+          const SizedBox(height: 8),
+          _QuickActionTile(
+            key: const Key('mediaKitQuickAction'),
+            title: 'Verified Media Kit',
+            icon: Icons.badge_outlined,
+            onTap: () => context.push('/mediakit-settings'),
+          ),
         ],
       ),
       const SizedBox(height: 32),
@@ -794,6 +808,7 @@ class _QuickActionTile extends StatelessWidget {
   final VoidCallback onTap;
 
   const _QuickActionTile({
+    super.key,
     required this.title,
     required this.icon,
     required this.onTap,
