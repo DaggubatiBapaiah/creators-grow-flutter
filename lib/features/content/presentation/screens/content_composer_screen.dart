@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../social_accounts/presentation/notifiers/social_accounts_notifier.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../social_accounts/presentation/notifiers/social_accounts_notifier.dart';
 import '../notifiers/content_notifier.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,7 +20,7 @@ class _ContentComposerScreenState extends ConsumerState<ContentComposerScreen> {
   @override
   Widget build(BuildContext context) {
     final accountsState = ref.watch(socialAccountsNotifierProvider);
-    final connectedAccounts = accountsState.accounts.where((a) => a.status == 'connected').toList();
+    final connectedAccounts = (accountsState.value ?? []).where((a) => a.status == 'connected').toList();
     final contentState = ref.watch(contentNotifierProvider);
 
     return Scaffold(
@@ -45,7 +45,7 @@ class _ContentComposerScreenState extends ConsumerState<ContentComposerScreen> {
               items: connectedAccounts.map((account) {
                 return DropdownMenuItem(
                   value: account.id,
-                  child: Text('${account.platform} - ${account.username}'),
+                  child: Text('@${account.accountName}', style: const TextStyle(fontSize: 16)),
                 );
               }).toList(),
               onChanged: (val) => setState(() => _selectedAccountId = val),
@@ -67,7 +67,7 @@ class _ContentComposerScreenState extends ConsumerState<ContentComposerScreen> {
               decoration: BoxDecoration(
                 color: AppTheme.surfaceColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
+                border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.1)),
               ),
               child: const Center(
                 child: Column(
@@ -155,12 +155,12 @@ class _ContentComposerScreenState extends ConsumerState<ContentComposerScreen> {
       return;
     }
     final accountsState = ref.read(socialAccountsNotifierProvider);
-    final account = accountsState.accounts.firstWhere((a) => a.id == _selectedAccountId);
+    final account = accountsState.value!.firstWhere((a) => a.id == _selectedAccountId);
 
     try {
       await ref.read(contentNotifierProvider.notifier).createPost(
         socialAccountId: _selectedAccountId!,
-        platform: account.platform,
+        platform: account.platform.name,
         caption: _captionController.text,
         status: status,
         scheduledAt: _scheduledAt,

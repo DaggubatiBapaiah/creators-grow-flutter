@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/content_post.dart';
-import '../data/repositories/content_repository.dart';
+import '../../domain/models/content_post.dart';
+import '../../data/repositories/content_repository.dart';
 
 class ContentState {
   final List<ContentPost> posts;

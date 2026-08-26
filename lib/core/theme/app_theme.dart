@@ -7,6 +7,8 @@ class AppTheme {
   static const Color backgroundColor = Color(0xFF0F172A); // Modern Slate Dark
   static const Color surfaceColor = Color(0xFF1E293B); // Slate Surface
   static const Color accentColor = Color(0xFF10B981); // Emerald Accent (Insights/Growth)
+  static const Color errorColor = Color(0xFFEF4444); // Red error
+  static const Color secondaryTextColor = Color(0xFF94A3B8); // Slate 400
 
   static ThemeData get darkTheme {
     return ThemeData(

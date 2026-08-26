@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/notifiers/onboarding_notifier.dart';
 
@@ -77,7 +77,7 @@ class OnboardingCompleteScreen extends ConsumerWidget {
       children: [
         CircleAvatar(
           radius: 16,
-          backgroundColor: const Color(0xFF6366F1).withOpacity(0.2),
+          backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.2),
           child: Text(
             number,
             style: const TextStyle(color: Color(0xFF6366F1), fontWeight: FontWeight.bold),

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
-import '../../../core/network/api_client.dart';
-import '../models/content_post.dart';
+import '../../../../core/network/api_client.dart';
+import '../../domain/models/content_post.dart';
 
 class ContentRepository {
   final Dio _dio;

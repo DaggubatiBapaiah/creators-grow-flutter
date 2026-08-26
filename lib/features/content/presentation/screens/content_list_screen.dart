@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../notifiers/content_notifier.dart';
-import '../models/content_post.dart';
+import '../../domain/models/content_post.dart';
 import 'package:intl/intl.dart';
 
 class ContentListScreen extends ConsumerStatefulWidget {
@@ -51,7 +51,7 @@ class _ContentListScreenState extends ConsumerState<ContentListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.feed_outlined, size: 64, color: AppTheme.secondaryTextColor.withOpacity(0.5)),
+          Icon(Icons.feed_outlined, size: 64, color: AppTheme.secondaryTextColor.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
           const Text('No content yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
@@ -144,7 +144,7 @@ class _ContentListScreenState extends ConsumerState<ContentListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

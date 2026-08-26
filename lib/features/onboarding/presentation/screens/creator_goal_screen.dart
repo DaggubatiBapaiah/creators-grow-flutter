@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/notifiers/onboarding_notifier.dart';
@@ -94,7 +94,7 @@ class _CreatorGoalScreenState extends ConsumerState<CreatorGoalScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF6366F1).withOpacity(0.15)
+                                ? const Color(0xFF6366F1).withValues(alpha: 0.15)
                                 : const Color(0xFF1E293B),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(

@@ -9,6 +9,7 @@ import '../../../../features/social_accounts/presentation/notifiers/social_accou
 import '../../../../features/social_accounts/domain/models/social_platform.dart';
 import '../../../../features/social_accounts/domain/models/social_account.dart';
 import '../../../../features/content/presentation/screens/content_list_screen.dart';
+import '../../../../features/analytics/presentation/notifiers/analytics_notifier.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -93,6 +94,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
     final authState = ref.watch(authNotifierProvider);
     final onboardingState = ref.watch(onboardingNotifierProvider);
     final socialAccountsState = ref.watch(socialAccountsNotifierProvider);
+    final analyticsState = ref.watch(dashboardStatsProvider);
 
     final displayName = authState is Authenticated
         ? authState.user.displayName
@@ -170,7 +172,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
                             flex: 3,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: _buildMainDashboardList(),
+                              children: _buildMainDashboardList(analyticsState),
                             ),
                           ),
                           const SizedBox(width: 24),
@@ -187,7 +189,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          ..._buildMainDashboardList(),
+                          ..._buildMainDashboardList(analyticsState),
                           const SizedBox(height: 24),
                           ..._buildSideDashboardList(socialAccountsState),
                         ],
@@ -202,140 +204,164 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
     );
   }
 
-  List<Widget> _buildMainDashboardList() {
-    return [
-      // SECTION 1 - GROWTH OVERVIEW
-      const Text(
-        'Growth Overview',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-      ),
-      const SizedBox(height: 12),
-      LayoutBuilder(
-        builder: (context, constraints) {
-          final crossCount = constraints.maxWidth > 500 ? 4 : 2;
-          return GridView.count(
-            crossAxisCount: crossCount,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.25,
-            children: const [
-              _OverviewCard(title: 'Followers', value: '12.8K', change: '+8.4%', isPositive: true),
-              _OverviewCard(title: 'Engagement', value: '6.7%', change: '+1.2%', isPositive: true),
-              _OverviewCard(title: 'Posts', value: '24', change: 'This month', isPositive: null),
-              _OverviewCard(title: 'Reach', value: '184K', change: '+14.6%', isPositive: true),
-            ],
-          );
-        },
-      ),
-      const SizedBox(height: 32),
+  List<Widget> _buildMainDashboardList(AsyncValue<DashboardStats> analyticsState) {
+    return analyticsState.when(
+      loading: () => [
+        const Padding(
+          padding: EdgeInsets.all(48.0),
+          child: Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
+        )
+      ],
+      error: (err, stack) => [
+        Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Text('Error loading stats: $err', style: const TextStyle(color: Colors.redAccent)),
+        )
+      ],
+      data: (stats) {
+        return [
+          // SECTION 1 - GROWTH OVERVIEW
+          const Text(
+            'Growth Overview',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 12),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final crossCount = constraints.maxWidth > 500 ? 4 : 2;
+              return GridView.count(
+                crossAxisCount: crossCount,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.25,
+                children: [
+                  _OverviewCard(title: 'Followers', value: '${stats.followersCount}', change: 'Total', isPositive: null),
+                  _OverviewCard(title: 'Reach (24h)', value: '${stats.reach24h}', change: 'vs prior 24h', isPositive: null),
+                  _OverviewCard(title: 'Posts Published', value: '${stats.publishedPosts}', change: 'All time', isPositive: null),
+                  _OverviewCard(title: 'Posts Scheduled', value: '${stats.scheduledPosts}', change: 'Upcoming', isPositive: null),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 32),
 
-      // SECTION 3 - CONTENT PERFORMANCE CHART
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // SECTION 3 - CONTENT PERFORMANCE CHART
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Content Performance',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Content Performance',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Aggregated reach',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Aggregated reach (Demo Data)',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                    // TIME SELECTOR
+                    Row(
+                      children: ['7D', '30D', '90D'].map((filter) {
+                        final isSelected = _selectedTimeFilter == filter;
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 6.0),
+                          child: ChoiceChip(
+                            label: Text(filter),
+                            selected: isSelected,
+                            selectedColor: const Color(0xFF6366F1),
+                            backgroundColor: const Color(0xFF0F172A),
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            onSelected: (bool selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedTimeFilter = filter;
+                                });
+                              }
+                            },
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
-                // TIME SELECTOR
-                Row(
-                  children: ['7D', '30D', '90D'].map((filter) {
-                    final isSelected = _selectedTimeFilter == filter;
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 6.0),
-                      child: ChoiceChip(
-                        label: Text(filter),
-                        selected: isSelected,
-                        selectedColor: const Color(0xFF6366F1),
-                        backgroundColor: const Color(0xFF0F172A),
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : const Color(0xFF94A3B8),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        onSelected: (bool selected) {
-                          if (selected) {
-                            setState(() {
-                              _selectedTimeFilter = filter;
-                            });
-                          }
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
+                const SizedBox(height: 24),
+                if (stats.history.isEmpty)
+                  const SizedBox(
+                    height: 200,
+                    child: Center(
+                      child: Text('No analytics data yet', style: TextStyle(color: Color(0xFF64748B))),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 200,
+                    child: LineChart(
+                      _getChartData(stats),
+                    ),
+                  ),
               ],
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              height: 200,
-              child: LineChart(
-                _getChartData(),
-              ),
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 32),
+          ),
+          const SizedBox(height: 32),
 
-      // SECTION 4 - CONTENT PIPELINE
-      const Text(
-        'Content Pipeline',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-      ),
-      const SizedBox(height: 12),
-      Row(
-        children: [
-          Expanded(
-            child: _PipelineCard(
-              title: 'Drafts',
-              count: '4',
-              icon: Icons.edit_note_rounded,
-              color: Colors.amber[600]!,
-            ),
+          // SECTION 4 - CONTENT PIPELINE
+          const Text(
+            'Content Pipeline',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _PipelineCard(
-              title: 'Scheduled',
-              count: '8',
-              icon: Icons.calendar_month_rounded,
-              color: const Color(0xFF6366F1),
-            ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _PipelineCard(
+                  title: 'Drafts',
+                  count: '${stats.draftPosts}',
+                  icon: Icons.edit_note_rounded,
+                  color: Colors.amber[600]!,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _PipelineCard(
+                  title: 'Scheduled',
+                  count: '${stats.scheduledPosts}',
+                  icon: Icons.calendar_month_rounded,
+                  color: const Color(0xFF6366F1),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _PipelineCard(
+                  title: 'Published',
+                  count: '${stats.publishedPosts}',
+                  icon: Icons.check_circle_rounded,
+                  color: const Color(0xFF10B981),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _PipelineCard(
-              title: 'Published',
-              count: '24',
-              icon: Icons.check_circle_rounded,
-              color: const Color(0xFF10B981),
-            ),
-          ),
-        ],
-      ),
-    ];
+        ];
+      },
+    );
   }
 
   List<Widget> _buildSideDashboardList(AsyncValue<List<SocialAccount>> socialAccountsState) {
@@ -548,36 +574,37 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
     );
   }
 
-  LineChartData _getChartData() {
+  LineChartData _getChartData(DashboardStats stats) {
     List<FlSpot> spots = [];
-    if (_selectedTimeFilter == '7D') {
-      spots = const [
-        FlSpot(0, 10),
-        FlSpot(1, 15),
-        FlSpot(2, 12),
-        FlSpot(3, 20),
-        FlSpot(4, 25),
-        FlSpot(5, 23),
-        FlSpot(6, 35),
-      ];
-    } else if (_selectedTimeFilter == '30D') {
-      spots = const [
-        FlSpot(0, 10),
-        FlSpot(2, 18),
-        FlSpot(4, 15),
-        FlSpot(6, 25),
-        FlSpot(8, 30),
-        FlSpot(10, 28),
-        FlSpot(12, 45),
-      ];
-    } else {
-      spots = const [
-        FlSpot(0, 10),
-        FlSpot(3, 25),
-        FlSpot(6, 20),
-        FlSpot(9, 45),
-        FlSpot(12, 60),
-      ];
+    int daysLimit = 7;
+    if (_selectedTimeFilter == '30D') daysLimit = 30;
+    if (_selectedTimeFilter == '90D') daysLimit = 90;
+
+    final now = DateTime.now();
+    final cutoff = now.subtract(Duration(days: daysLimit));
+
+    // Filter historical data
+    final filteredHistory = stats.history.where((p) {
+      final pDate = DateTime.tryParse(p.date) ?? now;
+      return pDate.isAfter(cutoff) || pDate.isAtSameMomentAs(cutoff);
+    }).toList();
+
+    // Map to spots (X: days ago from now, Y: reach)
+    for (final point in filteredHistory) {
+      final pDate = DateTime.tryParse(point.date) ?? now;
+      final daysDiff = now.difference(pDate).inDays.toDouble();
+      
+      // We want X to be chronological, so 0 is oldest, or just map sequentially if sorted.
+      // Assuming stats.history is sorted oldest to newest, we can just use index for X, or standard days.
+      spots.add(FlSpot(daysLimit - daysDiff, point.reach.toDouble()));
+    }
+
+    if (spots.isEmpty) {
+      // Just one empty spot if nothing
+      spots.add(const FlSpot(0, 0));
+    } else if (spots.length == 1) {
+      // Add a 0 point so it draws a line
+      spots.insert(0, FlSpot(spots[0].x - 1, 0));
     }
 
     return LineChartData(
@@ -605,7 +632,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
           dotData: const FlDotData(show: false),
           belowBarData: BarAreaData(
             show: true,
-            color: const Color(0xFF6366F1).withOpacity(0.1),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.1),
           ),
         ),
       ],

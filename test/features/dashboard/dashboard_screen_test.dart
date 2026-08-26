@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:creators_grow/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:creators_grow/features/social_accounts/data/repositories/social_accounts_repository.dart';
 import 'package:creators_grow/features/social_accounts/domain/models/social_account.dart';
+import 'package:creators_grow/features/content/data/repositories/content_repository.dart';
+import 'package:creators_grow/features/content/domain/models/content_post.dart';
+import 'package:creators_grow/features/analytics/data/repositories/analytics_repository.dart';
+import 'package:creators_grow/features/analytics/presentation/notifiers/analytics_notifier.dart';
 
 class MockSocialAccountsRepository implements SocialAccountsRepository {
   @override
@@ -13,12 +17,36 @@ class MockSocialAccountsRepository implements SocialAccountsRepository {
   Future<List<SocialAccount>> getConnectedAccounts() async {
     return [];
   }
+}
+
+class MockContentRepository implements ContentRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Future<void> disconnectAccount(String id) async {}
+  Future<List<ContentPost>> getPosts() async {
+    return [];
+  }
+}
+
+class MockAnalyticsRepository implements AnalyticsRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Future<String> getMetaConnectUrl() async => '';
+  Future<Map<String, dynamic>> getDashboardStats() async {
+    return {
+      'followers': 0,
+      'engagementRate': 0,
+      'reach': 0,
+      'history': [],
+      'draftsCount': 0,
+      'scheduledCount': 0,
+      'publishedCount': 0,
+      'failedCount': 0,
+      'topPosts': [],
+    };
+  }
 }
 
 void main() {
@@ -27,12 +55,16 @@ void main() {
       ProviderScope(
         overrides: [
           socialAccountsRepositoryProvider.overrideWithValue(MockSocialAccountsRepository()),
+          contentRepositoryProvider.overrideWithValue(MockContentRepository()),
+          analyticsRepositoryProvider.overrideWithValue(MockAnalyticsRepository()),
         ],
         child: const MaterialApp(
           home: DashboardScreen(),
         ),
       ),
     );
+
+    await tester.pumpAndSettle();
 
     // Verify bottom navigation items are present
     expect(find.byType(BottomNavigationBar), findsOneWidget);
