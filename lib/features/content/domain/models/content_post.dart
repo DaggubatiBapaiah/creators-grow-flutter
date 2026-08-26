@@ -1,4 +1,4 @@
-class ContentPost {
+﻿class ContentPost {
   final String id;
   final String userId;
   final String socialAccountId;
@@ -10,6 +10,7 @@ class ContentPost {
   final DateTime? publishedAt;
   final String? externalPostId;
   final String? failureReason;
+  final bool aiGenerated;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -25,6 +26,7 @@ class ContentPost {
     this.publishedAt,
     this.externalPostId,
     this.failureReason,
+    this.aiGenerated = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -42,6 +44,7 @@ class ContentPost {
       publishedAt: json['published_at'] != null ? DateTime.parse(json['published_at'] as String) : null,
       externalPostId: json['external_post_id'] as String?,
       failureReason: json['failure_reason'] as String?,
+      aiGenerated: json['ai_generated'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -60,6 +63,7 @@ class ContentPost {
       'published_at': publishedAt?.toIso8601String(),
       'external_post_id': externalPostId,
       'failure_reason': failureReason,
+      'ai_generated': aiGenerated,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -74,6 +78,7 @@ class ContentPost {
     List<String>? mediaIds,
     String? status,
     DateTime? scheduledAt,
+    bool? aiGenerated,
     DateTime? publishedAt,
     String? externalPostId,
     String? failureReason,
@@ -89,6 +94,7 @@ class ContentPost {
       mediaIds: mediaIds ?? this.mediaIds,
       status: status ?? this.status,
       scheduledAt: scheduledAt ?? this.scheduledAt,
+      aiGenerated: aiGenerated ?? this.aiGenerated,
       publishedAt: publishedAt ?? this.publishedAt,
       externalPostId: externalPostId ?? this.externalPostId,
       failureReason: failureReason ?? this.failureReason,

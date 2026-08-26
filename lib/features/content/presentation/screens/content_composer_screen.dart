@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../social_accounts/presentation/notifiers/social_accounts_notifier.dart';
 import '../notifiers/content_notifier.dart';
+import '../widgets/ai_prompt_bottom_sheet.dart';
 import 'package:go_router/go_router.dart';
 
 class ContentComposerScreen extends ConsumerStatefulWidget {
@@ -16,6 +17,68 @@ class _ContentComposerScreenState extends ConsumerState<ContentComposerScreen> {
   final _captionController = TextEditingController();
   String? _selectedAccountId;
   DateTime? _scheduledAt;
+  bool _aiGenerated = false;
+
+  Future<void> _openAICopilot() async {
+    final accountsState = ref.read(socialAccountsNotifierProvider);
+    final accounts = accountsState.value ?? [];
+    final selectedAccount = accounts.where((a) => a.id == _selectedAccountId).firstOrNull;
+    final platform = selectedAccount?.platform.name ?? 'INSTAGRAM';
+
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => AIPromptBottomSheet(platform: platform),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      if (_captionController.text.trim().isEmpty) {
+        setState(() {
+          _captionController.text = result;
+          _aiGenerated = true;
+        });
+      } else {
+        if (!mounted) return;
+        final action = await showDialog<String>(
+          context: context,
+          builder: (context) => AlertDialog(
+            key: const Key('captionSafetyDialog'),
+            title: const Text('Caption safety'),
+            content: const Text('Do you want to replace your existing caption or append the generated text?'),
+            actions: [
+              TextButton(
+                key: const Key('replaceButton'),
+                onPressed: () => Navigator.pop(context, 'replace'),
+                child: const Text('Replace'),
+              ),
+              TextButton(
+                key: const Key('appendButton'),
+                onPressed: () => Navigator.pop(context, 'append'),
+                child: const Text('Append'),
+              ),
+              TextButton(
+                key: const Key('cancelButton'),
+                onPressed: () => Navigator.pop(context, 'cancel'),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        );
+
+        if (action == 'replace') {
+          setState(() {
+            _captionController.text = result;
+            _aiGenerated = true;
+          });
+        } else if (action == 'append') {
+          setState(() {
+            _captionController.text = '${_captionController.text}\n\n$result';
+            _aiGenerated = true;
+          });
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +115,7 @@ class _ContentComposerScreenState extends ConsumerState<ContentComposerScreen> {
             ),
             const SizedBox(height: 24),
             TextField(
+              key: const Key('composerCaptionField'),
               controller: _captionController,
               maxLines: 6,
               decoration: InputDecoration(
@@ -61,7 +125,16 @@ class _ContentComposerScreenState extends ConsumerState<ContentComposerScreen> {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
-            const SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                key: const Key('sparkAIButton'),
+                onPressed: _openAICopilot,
+                icon: const Icon(Icons.auto_awesome, size: 18, color: AppTheme.primaryColor),
+                label: const Text('Spark AI Copilot', style: TextStyle(color: AppTheme.primaryColor)),
+              ),
+            ),
+            const SizedBox(height: 12),
             Container(
               height: 120,
               decoration: BoxDecoration(
@@ -164,6 +237,7 @@ class _ContentComposerScreenState extends ConsumerState<ContentComposerScreen> {
         caption: _captionController.text,
         status: status,
         scheduledAt: _scheduledAt,
+        aiGenerated: _aiGenerated,
       );
       if (mounted) {
         context.pop();

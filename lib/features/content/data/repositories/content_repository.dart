@@ -13,6 +13,7 @@ class ContentRepository {
     required String platform,
     String? caption,
     List<String>? mediaIds,
+    bool aiGenerated = false,
     String status = 'draft',
     DateTime? scheduledAt,
   }) async {
@@ -20,6 +21,7 @@ class ContentRepository {
       'socialAccountId': socialAccountId,
       'platform': platform,
       'caption': caption,
+        'aiGenerated': aiGenerated,
       'mediaIds': mediaIds ?? [],
       'status': status,
       'scheduledAt': scheduledAt?.toIso8601String(),
@@ -31,6 +33,7 @@ class ContentRepository {
     required String id,
     String? caption,
     List<String>? mediaIds,
+    bool aiGenerated = false,
     String? status,
     DateTime? scheduledAt,
   }) async {

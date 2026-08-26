@@ -50,6 +50,7 @@ class ContentNotifier extends StateNotifier<ContentState> {
     List<String>? mediaIds,
     String status = 'draft',
     DateTime? scheduledAt,
+    bool aiGenerated = false,
   }) async {
     try {
       final newPost = await _repository.createPost(
@@ -59,6 +60,7 @@ class ContentNotifier extends StateNotifier<ContentState> {
         mediaIds: mediaIds,
         status: status,
         scheduledAt: scheduledAt,
+        aiGenerated: aiGenerated,
       );
       state = state.copyWith(posts: [newPost, ...state.posts]);
     } catch (e) {
