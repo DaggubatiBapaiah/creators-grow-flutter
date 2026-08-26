@@ -9,6 +9,27 @@ import 'package:creators_grow/features/content/domain/models/content_post.dart';
 import 'package:creators_grow/features/analytics/data/repositories/analytics_repository.dart';
 import 'package:creators_grow/features/analytics/presentation/notifiers/analytics_notifier.dart';
 
+
+import 'package:creators_grow/features/growth/data/repositories/growth_repository.dart';
+import 'package:creators_grow/features/growth/domain/models/growth_models.dart';
+import 'package:creators_grow/features/growth/presentation/notifiers/growth_notifier.dart';
+
+class MockGrowthRepository implements GrowthRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  Future<GrowthScore> getGrowthScore() async {
+    return GrowthScore(score: 0, change: 0, trend: 'flat', factors: []);
+  }
+  @override
+  Future<List<BestTimeScore>> getBestTimes() async { return []; }
+  @override
+  Future<ContentAnalysis> getContentAnalysis() async { return ContentAnalysis(formats: [], overallAverageEngagement: 0, overallAverageReach: 0); }
+  @override
+  Future<List<GrowthRecommendation>> getRecommendations() async { return []; }
+}
+
 class MockSocialAccountsRepository implements SocialAccountsRepository {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -57,6 +78,7 @@ void main() {
           socialAccountsRepositoryProvider.overrideWithValue(MockSocialAccountsRepository()),
           contentRepositoryProvider.overrideWithValue(MockContentRepository()),
           analyticsRepositoryProvider.overrideWithValue(MockAnalyticsRepository()),
+          growthRepositoryProvider.overrideWithValue(MockGrowthRepository()),
         ],
         child: const MaterialApp(
           home: DashboardScreen(),

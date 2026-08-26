@@ -9,6 +9,7 @@ import '../../../../features/social_accounts/presentation/notifiers/social_accou
 import '../../../../features/social_accounts/domain/models/social_platform.dart';
 import '../../../../features/social_accounts/domain/models/social_account.dart';
 import '../../../../features/content/presentation/screens/content_list_screen.dart';
+import 'package:creators_grow/features/growth/presentation/screens/growth_screen.dart';
 import '../../../../features/analytics/presentation/notifiers/analytics_notifier.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -27,7 +28,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       const _HomeTab(),
       const ContentListScreen(),
       const _PlaceholderTab(title: 'Advanced Analytics', icon: Icons.analytics_outlined),
-      const _PlaceholderTab(title: 'Creator Insights', icon: Icons.insights_outlined),
+      const GrowthScreen(),
       const _ProfileTab(),
     ];
 
