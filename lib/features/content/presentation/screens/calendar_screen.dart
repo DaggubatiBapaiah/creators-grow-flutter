@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:go_router/go_router.dart';
 import '../notifiers/content_notifier.dart';
 import '../../domain/models/content_post.dart';
 

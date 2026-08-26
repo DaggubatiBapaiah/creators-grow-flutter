@@ -123,7 +123,7 @@ class _ConnectedAccountsScreenState extends ConsumerState<ConnectedAccountsScree
   void _handleConnect(SocialPlatform platform) {
     if (!platform.isSupported) return;
     
-    ref.read(socialAccountsNotifierProvider.notifier).connectMeta().then((_) {
+    ref.read(socialAccountsNotifierProvider.notifier).connectPlatform(platform).then((_) {
       if (!mounted) return;
       // Prompt user to refresh after returning
       ScaffoldMessenger.of(context).showSnackBar(

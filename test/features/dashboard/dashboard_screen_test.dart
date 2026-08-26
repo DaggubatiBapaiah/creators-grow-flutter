@@ -12,7 +12,6 @@ import 'package:creators_grow/features/analytics/presentation/notifiers/analytic
 
 import 'package:creators_grow/features/growth/data/repositories/growth_repository.dart';
 import 'package:creators_grow/features/growth/domain/models/growth_models.dart';
-import 'package:creators_grow/features/growth/presentation/notifiers/growth_notifier.dart';
 
 class MockGrowthRepository implements GrowthRepository {
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/errors/app_error.dart';
 import '../../domain/models/social_account.dart';
+import '../../domain/models/social_platform.dart';
 
 final socialAccountsRepositoryProvider = Provider<SocialAccountsRepository>((ref) {
   final dio = ref.watch(dioProvider);
@@ -33,9 +34,9 @@ class SocialAccountsRepository {
     }
   }
 
-  Future<String> getMetaConnectUrl() async {
+  Future<String> getConnectUrl(SocialPlatform platform) async {
     try {
-      final response = await _dio.post('/api/v1/social/meta/connect');
+      final response = await _dio.post('/api/v1/social/${platform.name}/connect');
       final data = response.data as Map<String, dynamic>;
       return data['authUrl'] as String;
     } catch (e) {

@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/errors/app_error.dart';
 import '../../data/repositories/social_accounts_repository.dart';
 import '../../domain/models/social_account.dart';
+import '../../domain/models/social_platform.dart';
 
 final socialAccountsNotifierProvider = StateNotifierProvider<SocialAccountsNotifier, AsyncValue<List<SocialAccount>>>((ref) {
   final repository = ref.watch(socialAccountsRepositoryProvider);
@@ -28,11 +29,11 @@ class SocialAccountsNotifier extends StateNotifier<AsyncValue<List<SocialAccount
     }
   }
 
-  Future<void> connectMeta() async {
+  Future<void> connectPlatform(SocialPlatform platform) async {
     try {
       // We now call the authenticated POST endpoint to generate the secure OAuth URL.
       // Dio interceptor handles the JWT automatically.
-      final url = await _repository.getMetaConnectUrl();
+      final url = await _repository.getConnectUrl(platform);
       final uri = Uri.parse(url);
       
       if (await canLaunchUrl(uri)) {
