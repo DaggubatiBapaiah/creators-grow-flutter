@@ -12,7 +12,10 @@ class AuthRepository {
     required String password,
     required String displayName,
   }) async {
+    print('AUTH_REGISTER_START');
+    print('AUTH_REGISTER_URL: /api/v1/auth/register');
     try {
+      print('AUTH_REGISTER_REQUEST_SENT');
       final response = await _dio.post(
         '/api/v1/auth/register',
         data: {
@@ -21,8 +24,14 @@ class AuthRepository {
           'displayName': displayName,
         },
       );
-      return response.data as Map<String, dynamic>;
+      print('AUTH_REGISTER_RESPONSE_RECEIVED');
+      print('AUTH_REGISTER_STATUS: ${response.statusCode}');
+      
+      final data = response.data as Map<String, dynamic>;
+      print('AUTH_REGISTER_RESPONSE_PARSED');
+      return data;
     } catch (e) {
+      print('AUTH_REGISTER_ERROR: $e');
       throw AppErrorHandler.handle(e);
     }
   }

@@ -20,13 +20,18 @@ import '../../features/monetization/presentation/screens/crm_pipeline_screen.dar
 import '../../features/monetization/presentation/screens/mediakit_settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authNotifierProvider);
-  final onboardingState = ref.watch(onboardingNotifierProvider);
-
   return GoRouter(
     initialLocation: '/welcome',
     refreshListenable: RouterNotifier(ref),
     redirect: (context, state) {
+      final authState = ref.read(authNotifierProvider);
+      final onboardingState = ref.read(onboardingNotifierProvider);
+
+      if (authState is AuthInitial || authState is AuthLoading) {
+        debugPrint('[ROUTER_DEBUG] location=${state.matchedLocation} auth=loading redirect=null');
+        return null;
+      }
+
       final isLoggingIn = state.matchedLocation == '/login';
       final isRegistering = state.matchedLocation == '/register';
       final isWelcoming = state.matchedLocation == '/welcome';
@@ -36,23 +41,30 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = authState is Authenticated;
       final isOnboarded = onboardingState.completed;
 
+      debugPrint('[ROUTER_DEBUG] location=${state.matchedLocation} isAuth=$isAuthenticated isOnboarded=$isOnboarded');
+
       if (!isAuthenticated) {
         if (!isLoggingIn && !isRegistering && !isWelcoming) {
+          debugPrint('[ROUTER_DEBUG] redirect to /welcome');
           return '/welcome';
         }
-      } else {
-        // Authenticated users
-        if (!isOnboarded) {
-          // If onboarding is incomplete, restrict navigation to onboarding routes
-          if (!isOnboardingRoute) {
-            return '/onboarding/welcome';
-          }
-        } else {
-          // If onboarding is complete, redirect to /home if trying to access auth/onboarding screens
-          if (isLoggingIn || isRegistering || isWelcoming || isOnboardingRoute) {
-            return '/home';
-          }
+        return null;
+      }
+
+      // Authenticated users
+      if (!isOnboarded) {
+        // If onboarding is incomplete, restrict navigation to onboarding routes
+        if (!isOnboardingRoute) {
+          debugPrint('[ROUTER_DEBUG] redirect to /onboarding/profile');
+          return '/onboarding/profile';
         }
+        return null;
+      }
+
+      // If onboarding is complete, redirect to /home if trying to access auth/onboarding screens
+      if (isLoggingIn || isRegistering || isWelcoming || isOnboardingRoute) {
+        debugPrint('[ROUTER_DEBUG] redirect to /home');
+        return '/home';
       }
 
       return null;
@@ -126,7 +138,11 @@ class RouterNotifier extends ChangeNotifier {
     );
     ref.listen(
       onboardingNotifierProvider,
-      (previous, next) => notifyListeners(),
+      (previous, next) {
+        if (previous?.completed != next.completed) {
+          notifyListeners();
+        }
+      },
     );
   }
 }

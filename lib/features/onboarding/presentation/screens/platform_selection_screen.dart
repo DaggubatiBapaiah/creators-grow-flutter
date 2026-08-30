@@ -47,7 +47,7 @@ class _PlatformSelectionScreenState extends ConsumerState<PlatformSelectionScree
       return;
     }
     ref.read(onboardingNotifierProvider.notifier).updatePlatforms(_selectedPlatforms);
-    context.push('/onboarding/complete');
+    context.go('/onboarding/complete');
   }
 
   @override
@@ -57,7 +57,7 @@ class _PlatformSelectionScreenState extends ConsumerState<PlatformSelectionScree
         title: const Text('Step 3 of 4'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/onboarding/goals'),
         ),
       ),
       body: SafeArea(

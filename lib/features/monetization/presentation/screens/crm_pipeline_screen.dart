@@ -4,6 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../notifiers/brand_deals_notifier.dart';
 import '../../domain/models/brand_deal.dart';
 import '../../../content/presentation/notifiers/content_notifier.dart';
+import '../../../billing/presentation/widgets/locked_feature_gate.dart';
 
 class CrmPipelineScreen extends ConsumerStatefulWidget {
   const CrmPipelineScreen({Key? key}) : super(key: key);
@@ -225,12 +226,15 @@ class _CrmPipelineScreenState extends ConsumerState<CrmPipelineScreen> {
           ),
         ],
       ),
-      body: state.isLoading && state.deals.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: () => ref.read(brandDealsNotifierProvider.notifier).fetchDeals(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
+      body: LockedFeatureGate(
+        featureName: 'Brand Deals CRM',
+        checkAccess: (bState) => bState.status?.hasCrmAccess ?? false,
+        child: state.isLoading && state.deals.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: () => ref.read(brandDealsNotifierProvider.notifier).fetchDeals(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -321,10 +325,11 @@ class _CrmPipelineScreenState extends ConsumerState<CrmPipelineScreen> {
                           );
                         },
                       ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 }

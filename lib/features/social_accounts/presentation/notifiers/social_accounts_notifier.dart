@@ -36,16 +36,20 @@ class SocialAccountsNotifier extends StateNotifier<AsyncValue<List<SocialAccount
       final url = await _repository.getConnectUrl(platform);
       final uri = Uri.parse(url);
       
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
+      bool launched = false;
+      try {
+        launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } catch (_) {
+        launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+      
+      if (!launched) {
         throw const ServerError('Could not open OAuth connection page in browser.');
       }
+    } on AppError {
+      rethrow;
     } catch (e) {
-      state = AsyncError(
-        e is AppError ? e : UnknownError(e.toString()),
-        StackTrace.current
-      );
+      throw UnknownError('Could not open OAuth connection page in browser: ${e.toString()}');
     }
   }
 

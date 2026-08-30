@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 class AppConfig {
   static String get apiBaseUrl {
@@ -8,12 +8,13 @@ class AppConfig {
     }
     try {
       if (Platform.isAndroid) {
-        return 'http://10.0.2.2:3000';
+        // Fallback to production if no dart-define is provided
+        return 'https://creatorsgrowbackend-flutter.vercel.app';
       }
     } catch (_) {
       // Fallback for non-IO platforms (e.g. Web)
     }
-    return 'http://localhost:3000';
+    return 'https://creatorsgrowbackend-flutter.vercel.app';
   }
 
   static const Duration connectTimeout = Duration(seconds: 15);

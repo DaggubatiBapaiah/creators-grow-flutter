@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../features/auth/domain/models/auth_state.dart';
@@ -11,6 +12,9 @@ import '../../../../features/social_accounts/domain/models/social_account.dart';
 import '../../../../features/content/presentation/screens/content_list_screen.dart';
 import 'package:creators_grow/features/growth/presentation/screens/growth_screen.dart';
 import '../../../../features/analytics/presentation/notifiers/analytics_notifier.dart';
+import '../../../../features/billing/presentation/screens/pricing_screen.dart';
+import '../../../../features/inbox/presentation/screens/inbox_screen.dart';
+import '../../../../features/notifications/presentation/screens/notification_settings_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -27,7 +31,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final List<Widget> tabs = [
       const _HomeTab(),
       const ContentListScreen(),
-      const _PlaceholderTab(title: 'Advanced Analytics', icon: Icons.analytics_outlined),
+      const InboxScreen(),
       const GrowthScreen(),
       const _ProfileTab(),
     ];
@@ -60,9 +64,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             label: 'Content',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.analytics_outlined),
-            activeIcon: Icon(Icons.analytics_rounded),
-            label: 'Analytics',
+            icon: Icon(Icons.mail_outline_rounded),
+            activeIcon: Icon(Icons.mail_rounded),
+            label: 'Inbox',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.insights_outlined),
@@ -937,7 +941,47 @@ class _ProfileTab extends ConsumerWidget {
             _buildProfileDetailRow('Category', category),
             _buildProfileDetailRow('Goals', goals),
             _buildProfileDetailRow('Platforms', platforms),
-            const SizedBox(height: 48),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.notifications_outlined, color: Color(0xFF6366F1)),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.surfaceColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Colors.white12),
+                ),
+              ),
+              label: const Text('Notification Settings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.star, color: Colors.amberAccent),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PricingScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.surfaceColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Colors.white12),
+                ),
+              ),
+              label: const Text('Plans & Subscription', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
+            const SizedBox(height: 24),
             OutlinedButton(
               onPressed: () {
                 ref.read(authNotifierProvider.notifier).logout();

@@ -43,13 +43,17 @@ class _CreatorProfileScreenState extends ConsumerState<CreatorProfileScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState?.validate() ?? false) {
-      ref.read(onboardingNotifierProvider.notifier).updateProfile(
-            _nameController.text.trim(),
-            _selectedCategory,
-          );
-      context.push('/onboarding/goals');
+      final name = _nameController.text.trim();
+      final category = _selectedCategory;
+      debugPrint('[PROFILE_DEBUG] BEFORE_SAVE name=$name category=$category');
+      
+      ref.read(onboardingNotifierProvider.notifier).updateProfile(name, category);
+      await ref.read(onboardingNotifierProvider.notifier).completeOnboarding();
+      
+      final state = ref.read(onboardingNotifierProvider);
+      debugPrint('[PROFILE_DEBUG] AFTER_SAVE completed=${state.completed} name=${state.displayName} category=${state.creatorCategory}');
     }
   }
 
@@ -57,10 +61,10 @@ class _CreatorProfileScreenState extends ConsumerState<CreatorProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Step 1 of 4'),
+        title: const Text('Profile Setup'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/onboarding/welcome'),
         ),
       ),
       body: SafeArea(

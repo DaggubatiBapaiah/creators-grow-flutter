@@ -7,6 +7,7 @@ import '../../domain/models/mediakit_config.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../auth/domain/notifiers/auth_notifier.dart';
 import '../../../auth/domain/models/auth_state.dart';
+import '../../../billing/presentation/widgets/locked_feature_gate.dart';
 
 class MediaKitSettingsScreen extends ConsumerStatefulWidget {
   const MediaKitSettingsScreen({Key? key}) : super(key: key);
@@ -76,10 +77,13 @@ class _MediaKitSettingsScreenState extends ConsumerState<MediaKitSettingsScreen>
 
     return Scaffold(
       appBar: AppBar(title: const Text('Media Kit Settings')),
-      body: state.isLoading && state.config == null
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+      body: LockedFeatureGate(
+        featureName: 'Customizable Media Kit',
+        checkAccess: (bState) => bState.status?.hasMediaKitCustomization ?? false,
+        child: state.isLoading && state.config == null
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -312,6 +316,7 @@ class _MediaKitSettingsScreenState extends ConsumerState<MediaKitSettingsScreen>
                 ],
               ),
             ),
+      ),
     );
   }
 }

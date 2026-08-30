@@ -22,13 +22,27 @@ final dioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
+        print('[AUTH REGISTER] REQUEST START');
+        print('[AUTH REGISTER] URL: ${options.uri}');
         final token = await secureStorage.getAuthToken();
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
         return handler.next(options);
       },
+      onResponse: (response, handler) {
+        print('[AUTH REGISTER] RESPONSE RECEIVED');
+        print('[AUTH REGISTER] STATUS: ${response.statusCode}');
+        return handler.next(response);
+      },
       onError: (DioException error, handler) {
+        print('[AUTH REGISTER] ERROR TYPE: ${error.type}');
+        print('[AUTH REGISTER] ERROR MESSAGE: ${error.message}');
+        if (error.response != null) {
+          print('[AUTH REGISTER] STATUS: ${error.response?.statusCode}');
+          print('[AUTH REGISTER] DATA: ${error.response?.data}');
+        }
+        
         final appError = AppErrorHandler.handle(error);
         return handler.next(
           DioException(

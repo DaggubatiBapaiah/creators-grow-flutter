@@ -47,7 +47,7 @@ class _CreatorGoalScreenState extends ConsumerState<CreatorGoalScreen> {
       return;
     }
     ref.read(onboardingNotifierProvider.notifier).updateGoals(_selectedGoals);
-    context.push('/onboarding/platforms');
+    context.go('/onboarding/platforms');
   }
 
   @override
@@ -57,7 +57,7 @@ class _CreatorGoalScreenState extends ConsumerState<CreatorGoalScreen> {
         title: const Text('Step 2 of 4'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/onboarding/profile'),
         ),
       ),
       body: SafeArea(

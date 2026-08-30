@@ -24,6 +24,6 @@ enum SocialPlatform {
   }
 
   bool get isSupported {
-    return this == SocialPlatform.instagram || this == SocialPlatform.facebook || this == SocialPlatform.tiktok;
+    return this == SocialPlatform.instagram || this == SocialPlatform.tiktok;
   }
 }

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class OnboardingWelcomeScreen extends StatelessWidget {
@@ -42,7 +42,7 @@ class OnboardingWelcomeScreen extends StatelessWidget {
                 ],
               ),
               FilledButton(
-                onPressed: () => context.push('/onboarding/profile'),
+                onPressed: () => context.go('/onboarding/profile'),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF6366F1),
                   padding: const EdgeInsets.symmetric(vertical: 16),

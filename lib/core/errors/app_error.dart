@@ -35,19 +35,25 @@ class AppErrorHandler {
     if (error is DioException) {
       switch (error.type) {
         case DioExceptionType.connectionTimeout:
+          return const NetworkError('Connection timeout (took too long to connect).');
         case DioExceptionType.sendTimeout:
+          return const NetworkError('Send timeout (took too long to send request).');
         case DioExceptionType.receiveTimeout:
+          return const NetworkError('Receive timeout (server took too long to respond).');
         case DioExceptionType.connectionError:
-          return const NetworkError('Network connection timeout. Please check your internet connection.');
+          return NetworkError('Connection error (refused or unreachable). Details: ${error.message}');
         case DioExceptionType.badResponse:
           final statusCode = error.response?.statusCode;
-          final message = error.response?.data?['message'] ?? 'Server error occurred.';
+          final message = error.response?.data?['message'] ?? error.response?.data?['error'] ?? 'Server error occurred.';
           if (statusCode == 401) {
             return UnauthorizedError(message: message.toString());
           }
-          return ServerError(message.toString(), statusCode: statusCode);
+          if (statusCode == 400 || statusCode == 409 || statusCode == 422) {
+            return ServerError(message.toString(), statusCode: statusCode);
+          }
+          return ServerError('Server responded with $statusCode: $message', statusCode: statusCode);
         default:
-          return UnknownError(error.message ?? 'An unknown network error occurred.');
+          return UnknownError(error.message ?? 'An unknown network error occurred (${error.type.name}).');
       }
     }
     if (error is AppError) {

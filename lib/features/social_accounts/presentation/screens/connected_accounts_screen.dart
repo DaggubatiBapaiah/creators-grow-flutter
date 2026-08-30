@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/errors/app_error.dart';
 import '../../domain/models/social_platform.dart';
 import '../../domain/models/social_account.dart';
 import '../notifiers/social_accounts_notifier.dart';
@@ -11,7 +12,26 @@ class ConnectedAccountsScreen extends ConsumerStatefulWidget {
   ConsumerState<ConnectedAccountsScreen> createState() => _ConnectedAccountsScreenState();
 }
 
-class _ConnectedAccountsScreenState extends ConsumerState<ConnectedAccountsScreen> with RouteAware {
+class _ConnectedAccountsScreenState extends ConsumerState<ConnectedAccountsScreen> with RouteAware, WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(socialAccountsNotifierProvider.notifier).fetchAccounts();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(socialAccountsNotifierProvider);
@@ -120,19 +140,27 @@ class _ConnectedAccountsScreenState extends ConsumerState<ConnectedAccountsScree
     );
   }
 
-  void _handleConnect(SocialPlatform platform) {
+  void _handleConnect(SocialPlatform platform) async {
     if (!platform.isSupported) return;
     
-    ref.read(socialAccountsNotifierProvider.notifier).connectPlatform(platform).then((_) {
+    try {
+      await ref.read(socialAccountsNotifierProvider.notifier).connectPlatform(platform);
       if (!mounted) return;
-      // Prompt user to refresh after returning
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Verification tab opened. Tap Refresh icon when finished connecting.'),
+          content: Text('Browser opened. Complete authorization and tap Refresh.'),
           duration: Duration(seconds: 5),
         ),
       );
-    });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e is AppError ? e.message : 'Could not open authorization in browser.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   void _handleDisconnect(SocialAccount account) {
