@@ -50,7 +50,10 @@ class _MyAppState extends ConsumerState<MyApp> {
     print('[DEEPLINK FORENSIC] path = ${uri.path}');
     print('[DEEPLINK FORENSIC] status query = ${uri.queryParameters["status"]}');
 
-    if (uri.scheme == 'creatorsgrow' && uri.host == 'oauth' && uri.path == '/callback') {
+    final isCustomScheme = uri.scheme == 'creatorsgrow' && uri.host == 'oauth' && uri.path == '/callback';
+    final isHttpsApplink = (uri.scheme == 'https' || uri.scheme == 'http') && uri.host == 'creatorsgrowbackend-flutter.vercel.app' && uri.path == '/oauth/callback';
+
+    if (isCustomScheme || isHttpsApplink) {
       print('[DEEPLINK FORENSIC] Triggering fetchAccounts() due to valid OAuth callback');
       ref.read(socialAccountsNotifierProvider.notifier).fetchAccounts();
     }
