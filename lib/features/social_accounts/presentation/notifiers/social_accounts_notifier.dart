@@ -21,10 +21,16 @@ class SocialAccountsNotifier extends StateNotifier<AsyncValue<List<SocialAccount
     state = const AsyncLoading();
     try {
       final accounts = await _repository.getConnectedAccounts();
+      print('[FORENSIC] NOTIFIER STATE = PASS (Received ${accounts.length} accounts)');
+      if (accounts.isNotEmpty) {
+        print('[FORENSIC] NOTIFIER ACCOUNTS = ${accounts.map((e) => e.platform.name).toList()}');
+      }
       state = AsyncData(accounts);
     } on AppError catch (e, stack) {
+      print('[FORENSIC] NOTIFIER STATE = FAIL ($e)');
       state = AsyncError(e, stack);
     } catch (e, stack) {
+      print('[FORENSIC] NOTIFIER STATE = FAIL ($e)');
       state = AsyncError(UnknownError(e.toString()), stack);
     }
   }
@@ -46,10 +52,34 @@ class SocialAccountsNotifier extends StateNotifier<AsyncValue<List<SocialAccount
       if (!launched) {
         throw const ServerError('Could not open OAuth connection page in browser.');
       }
+
+      // Start background polling for OAuth completion
+      _pollForConnection(platform);
     } on AppError {
       rethrow;
     } catch (e) {
       throw UnknownError('Could not open OAuth connection page in browser: ${e.toString()}');
+    }
+  }
+
+  void _pollForConnection(SocialPlatform platform) async {
+    // Poll every 3 seconds for up to 3 minutes (60 iterations) to reliably detect
+    // when the backend OAuth callback successfully finishes processing and updates the DB.
+    for (int i = 0; i < 60; i++) {
+      await Future.delayed(const Duration(seconds: 3));
+      if (!mounted) return;
+      
+      try {
+        final accounts = await _repository.getConnectedAccounts();
+        final newlyConnected = accounts.any((acc) => acc.platform == platform);
+        
+        if (newlyConnected) {
+          state = AsyncData(accounts);
+          break; // Stop polling once detected
+        }
+      } catch (_) {
+        // Ignore silent polling errors
+      }
     }
   }
 

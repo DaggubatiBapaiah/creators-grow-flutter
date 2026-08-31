@@ -6,7 +6,7 @@ void main() {
     test('apiBaseUrl returns default URL on host platform', () {
       final baseUrl = AppConfig.apiBaseUrl;
       // On Windows development/test environment:
-      expect(AppConfig.apiBaseUrl, 'http://127.0.0.1:3000');
+      expect(AppConfig.apiBaseUrl, 'https://creatorsgrowbackend-flutter.vercel.app');
     });
   });
 }

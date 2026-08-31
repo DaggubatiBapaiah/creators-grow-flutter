@@ -1,4 +1,4 @@
-﻿name: creators_grow
+name: creators_grow
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -46,6 +46,8 @@ dependencies:
   json_annotation: ^4.9.0
   url_launcher: ^6.3.0
   intl: ^0.19.0
+  app_links: ^7.2.1
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:

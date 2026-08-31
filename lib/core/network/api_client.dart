@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
 import '../storage/secure_storage.dart';
 import '../errors/app_error.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
@@ -22,17 +24,28 @@ final dioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
-        print('[AUTH REGISTER] REQUEST START');
-        print('[AUTH REGISTER] URL: ${options.uri}');
+        print('[ACCOUNTS FORENSIC] REQUEST START');
+        print('[ACCOUNTS FORENSIC] URL: ${options.uri}');
         final token = await secureStorage.getAuthToken();
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
+          final tokenHash = sha256.convert(utf8.encode(token)).toString();
+          print('[ACCOUNTS FORENSIC] JWT hash = $tokenHash');
+        } else {
+          print('[ACCOUNTS FORENSIC] JWT hash = NULL');
         }
         return handler.next(options);
       },
       onResponse: (response, handler) {
-        print('[AUTH REGISTER] RESPONSE RECEIVED');
-        print('[AUTH REGISTER] STATUS: ${response.statusCode}');
+        if (response.requestOptions.uri.path.contains('/accounts')) {
+          print('[ACCOUNTS FORENSIC] HTTP STATUS = ${response.statusCode}');
+          if (response.data != null && response.data['accounts'] != null) {
+            final accs = response.data['accounts'] as List;
+            final igAccs = accs.where((a) => a['platform'] == 'instagram').length;
+            print('[ACCOUNTS FORENSIC] response account count = ${accs.length}');
+            print('[ACCOUNTS FORENSIC] instagram account count = $igAccs');
+          }
+        }
         return handler.next(response);
       },
       onError: (DioException error, handler) {

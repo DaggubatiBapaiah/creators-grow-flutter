@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/app_error.dart';
@@ -13,6 +14,7 @@ class ConnectedAccountsScreen extends ConsumerStatefulWidget {
 }
 
 class _ConnectedAccountsScreenState extends ConsumerState<ConnectedAccountsScreen> with RouteAware, WidgetsBindingObserver {
+
   @override
   void initState() {
     super.initState();

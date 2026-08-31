@@ -17,11 +17,30 @@ class SocialAccountsRepository {
 
   Future<List<SocialAccount>> getConnectedAccounts() async {
     try {
+      print('[FORENSIC] GET /api/v1/social/accounts REQUEST START');
       final response = await _dio.get('/api/v1/social/accounts');
+      print('[FORENSIC] GET /api/v1/social/accounts HTTP STATUS = ${response.statusCode}');
+      
       final data = response.data as Map<String, dynamic>;
       final list = data['accounts'] as List<dynamic>;
-      return list.map((item) => SocialAccount.fromJson(item as Map<String, dynamic>)).toList();
+      print('[FORENSIC] RESPONSE ACCOUNT COUNT = ${list.length}');
+      
+      if (list.isNotEmpty) {
+        final platforms = list.map((e) => e['platform']).toList();
+        final usernames = list.map((e) => e['accountName']).toList();
+        print('[FORENSIC] PLATFORM VALUES = $platforms');
+        print('[FORENSIC] USERNAME VALUES = $usernames');
+      }
+
+      final parsedList = list.map((item) {
+        print('[FORENSIC] PARSING JSON ITEM: ${item['platform']}');
+        return SocialAccount.fromJson(item as Map<String, dynamic>);
+      }).toList();
+
+      print('[FORENSIC] MODEL PARSE = PASS');
+      return parsedList;
     } catch (e) {
+      print('[FORENSIC] HTTP REQUEST/PARSE = FAIL: $e');
       throw AppErrorHandler.handle(e);
     }
   }
