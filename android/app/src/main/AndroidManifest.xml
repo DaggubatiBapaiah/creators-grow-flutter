@@ -40,7 +40,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="creatorsgrowbackend-flutter.vercel.app" android:pathPrefix="/oauth/callback" />
+                <data android:scheme="https" android:host="app.creatorsgrow.co.in" android:pathPrefix="/oauth/callback" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

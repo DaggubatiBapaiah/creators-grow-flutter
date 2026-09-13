@@ -50,12 +50,36 @@ class _MyAppState extends ConsumerState<MyApp> {
     print('[DEEPLINK FORENSIC] path = ${uri.path}');
     print('[DEEPLINK FORENSIC] status query = ${uri.queryParameters["status"]}');
 
-    final isCustomScheme = uri.scheme == 'creatorsgrow' && uri.host == 'oauth' && uri.path == '/callback';
-    final isHttpsApplink = (uri.scheme == 'https' || uri.scheme == 'http') && uri.host == 'creatorsgrowbackend-flutter.vercel.app' && uri.path == '/oauth/callback';
+    final isHttpsApplink = (uri.scheme == 'https' || uri.scheme == 'http') && uri.host == 'app.creatorsgrow.co.in' && uri.path == '/oauth/callback';
 
-    if (isCustomScheme || isHttpsApplink) {
-      print('[DEEPLINK FORENSIC] Triggering fetchAccounts() due to valid OAuth callback');
-      ref.read(socialAccountsNotifierProvider.notifier).fetchAccounts();
+    if (isHttpsApplink) {
+      final status = uri.queryParameters['status'];
+      
+      if (status == 'success') {
+        print('[OAUTH HANDOFF] SUCCESS LINK RECEIVED');
+        ref.read(socialAccountsNotifierProvider.notifier).fetchAccounts();
+        // Since the accounts screen might not be in focus, or we might need to navigate there,
+        // typically the router can go to '/accounts' but we might already be there. 
+        // We'll let the user see it updated if they are on the screen. 
+        // If not, we could push it, but we'll show a snackbar for now to notify them.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Successfully connected account!'), backgroundColor: Colors.green),
+            );
+          }
+        });
+      } else if (status == 'error') {
+        final message = uri.queryParameters['message'] ?? 'Unknown error occurred.';
+        print('[OAUTH HANDOFF] ERROR LINK RECEIVED: $message');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to connect: $message'), backgroundColor: Colors.red),
+            );
+          }
+        });
+      }
     }
   }
 
