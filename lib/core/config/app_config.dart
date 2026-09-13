@@ -9,12 +9,12 @@ class AppConfig {
     try {
       if (Platform.isAndroid) {
         // Fallback to production if no dart-define is provided
-        return 'https://creatorsgrowbackend-flutter.vercel.app';
+        return 'https://api.creatorsgrow.co.in';
       }
     } catch (_) {
       // Fallback for non-IO platforms (e.g. Web)
     }
-    return 'https://creatorsgrowbackend-flutter.vercel.app';
+    return 'https://api.creatorsgrow.co.in';
   }
 
   static const Duration connectTimeout = Duration(seconds: 15);
